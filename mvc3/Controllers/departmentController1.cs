@@ -1,123 +1,118 @@
-﻿using Business_acess_lyer.repositories;
-using Microsoft.AspNetCore.Mvc;
+﻿using Business_acess_lyer.interfaces;
 using Data_access_lyer.models;
-using Microsoft.Identity.Client;
-using Business_acess_lyer.interfaces;
+using Microsoft.AspNetCore.Mvc;
+
 namespace mvc3.Controllers
 {
-    public class departmentController : Controller
-    {
-		//private readonly IGenericRepositories<department> repo;
-		//_unitofwork
-		//private readonly IUnitofwork  repo;
-		private readonly Idata_repositories repo;
-        public departmentController(Idata_repositories _repo)
-        {
-		repo = _repo;
-        }
-        [HttpGet]
-        public  async Task<IActionResult> Index()
-        {
-            var result = await repo.Getallasync();
-            return View(result);
-        }
-        public IActionResult Create()
-        {
-            return View();
-        }
-        [HttpPost]
-        public async Task< IActionResult >Create(department department)
-        {
-            if (!ModelState.IsValid) return View(department);
+	public class DepartmentController : Controller
+	{
+		private readonly IUnitofwork _unit;
 
+		public DepartmentController(IUnitofwork unit)
+		{
+			_unit = unit;
+		}
 
-          await  repo.createasync(department);
-            return RedirectToAction(nameof(Index));
+		// ========================= Index =========================
+		[HttpGet]
+		public async Task<IActionResult> Index()
+		{
+			var result = await _unit.data.Getallasync();
+			return View(result);
+		}
 
+		// ========================= Create =========================
+		[HttpGet]
+		public IActionResult Create()
+		{
+			return View();
+		}
 
-        }
-        public async Task<IActionResult> details(int? id) => await departmentcontrollerhandler(id, nameof(details));
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(department department)
+		{
+			if (!ModelState.IsValid)
+				return View(department);
 
-        public async  Task<IActionResult> Edit(int? id) =>  await departmentcontrollerhandler(id, nameof(Edit));
+			await _unit.data.createasync(department);
+			await _unit.SaveChangesasync();
 
+			return RedirectToAction(nameof(Index));
+		}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int Id, department department)
-        {
-            if (Id != department.id) { return BadRequest(); }
+		// ========================= Details =========================
+		public async Task<IActionResult> Details(int? id)
+			=> await DepartmentControllerHandler(id, nameof(Details));
 
-            else
-            {
-                if (ModelState.IsValid)
-                {
-                    try
-                    {
+		// ========================= Edit =========================
+		public async Task<IActionResult> Edit(int? id)
+			=> await DepartmentControllerHandler(id, nameof(Edit));
 
-                        repo.update(department);
-                        return RedirectToAction(nameof(Index));
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(int id, department department)
+		{
+			if (id != department.id)
+				return BadRequest();
 
-                    }
-                    catch (Exception ex)
-                    {
-                        ModelState.AddModelError("", ex.Message);
-                    }
-                }
+			if (!ModelState.IsValid)
+				return View(department);
 
-                return View(department);
+			try
+			{
+				_unit.data.update(department);
+				await _unit.SaveChangesasync();
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				return View(department);
+			}
+		}
 
-            }
+		// ========================= Delete =========================
+		public async Task<IActionResult> Delete(int? id)
+			=> await DepartmentControllerHandler(id, nameof(Delete));
 
-        }
-        public async Task< IActionResult> Delete(int? id) =>  await departmentcontrollerhandler(id, nameof(Delete));
-       
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public  async Task<IActionResult> ConfirmDelete(int? id)
-        {
+		[HttpPost, ActionName("Delete")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ConfirmDelete(int? id)
+		{
+			if (!id.HasValue)
+				return BadRequest();
 
-            if (!id.HasValue) { return BadRequest(); }
-            var repo1 =  await repo.Getasync(id.Value);
-            if (repo1 is null) { return NotFound(); }
-            else
-            {
-                if (ModelState.IsValid)
-                {
-                    try
-                    {
+			var department = await _unit.data.Getasync(id.Value);
+			if (department is null)
+				return NotFound();
 
-                        repo.delete(repo1);
-                        return RedirectToAction(nameof(Index));
+			try
+			{
+				_unit.data.Delete(department);
+				await _unit.SaveChangesasync();
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError("", ex.Message);
+				return View(department);
+			}
+		}
 
-                    }
-                    catch (Exception ex)
-                    {
-                        ModelState.AddModelError("", ex.Message);
-                    }
-                }
+		// ========================= Shared Handler =========================
+		private async Task<IActionResult> DepartmentControllerHandler(int? id, string viewName)
+		{
+			if (!id.HasValue)
+				return BadRequest();
 
-                return View(repo);
-            }
+			var department = await _unit.data.Getasync(id.Value);
 
-        }
-        private async Task<IActionResult> departmentcontrollerhandler(int? id ,string viewname)
-        {
-            if (!id.HasValue)
-            {
-                return BadRequest();
-            }
-            else
-            {
-                var department =  await repo.Getasync(id.Value);
-                if (department is null)
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    return View(department);
-                }
-            }
-        }
-    }
+			if (department is null)
+				return NotFound();
+
+			return View(viewName, department);
+		}
+	}
 }
+

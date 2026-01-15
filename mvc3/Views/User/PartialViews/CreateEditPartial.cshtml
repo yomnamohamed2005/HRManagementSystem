@@ -1,0 +1,34 @@
+﻿@model mvc3.viewmodels.createdusermodel
+
+<div class="form-group">
+    <label asp-for="firstname"></label>
+    <input class="form-control" asp-for="firstname" />
+    <span class="text-danger" asp-validation-for="firstname"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="lastname"></label>
+    <input class="form-control" asp-for="lastname" />
+    <span class="text-danger" asp-validation-for="lastname"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="username"></label>
+    <input class="form-control" asp-for="username" />
+    <span class="text-danger" asp-validation-for="username"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="email"></label>
+    <input class="form-control" asp-for="email" />
+    <span class="text-danger" asp-validation-for="email"></span>
+</div>
+
+@if (Model.roles != null && Model.roles.Any())
+{
+    <div class="form-group">
+        <label asp-for="roles"></label>
+        <select class="form-control" asp-for="roles" asp-items="@(new SelectList(Model.roles))"></select>
+        <span class="text-danger" asp-validation-for="roles"></span>
+    </div>
+}

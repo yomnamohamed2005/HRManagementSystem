@@ -19,20 +19,26 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
                     <ul class="navbar-nav flex-grow-1">
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-dark"asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="department" asp-action="Index">department</a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Employee" asp-action="Index">Employee</a>
                         </li>
-                        @if (User.IsInRole("superadmin"))
+
+                      @if (User.IsInRole("superadmin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="user" asp-action="Index">user</a>
@@ -40,7 +46,7 @@
 
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="role" asp-action="Index">roles</a>
-                        </li>
+                             </li>
                         }
                     </ul>
                     @if (User.Identity.IsAuthenticated)
@@ -55,6 +61,7 @@
                             <a class="nav-link text-dark" asp-controller="account" asp-action="login">login</a>
                         </li>
                     }
+                    </ul>
                 </div>
             </div>
         </nav>

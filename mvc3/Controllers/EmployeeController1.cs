@@ -102,7 +102,7 @@ namespace mvc3.Controllers
                     try
                     {
 
-                        _unitofwork.employees.delete(repo1);
+                        _unitofwork.employees.Delete(repo1);
                         if(await _unitofwork.SaveChangesasync()>0&&repo1.imagename is not null)
                            documentsetting.deletefiles("images" ,repo1.imagename);
                         return RedirectToAction(nameof(Index));

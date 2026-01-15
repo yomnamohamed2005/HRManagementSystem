@@ -40,26 +40,32 @@ namespace mvc3.Controllers
         }
         public async Task<IActionResult> Index(string name)
         {
+            List<roleviewmodel> rolesList;
+
             if (string.IsNullOrEmpty(name))
             {
-                var roles = await _rolemanager.Roles.Select(r => new roleviewmodel
-                {
-                    name = r.Name,
-                    id = r.Id
-
-                }
-               ).ToListAsync();
-                return View(roles);
+                rolesList = await _rolemanager.Roles
+                    .Select(r => new roleviewmodel
+                    {
+                        name = r.Name,
+                        id = r.Id
+                    })
+                    .ToListAsync();
             }
+            else
+            {
                 var role = await _rolemanager.FindByNameAsync(name);
-                if (role is null) return View(Enumerable.Empty<roleviewmodel>());
-                var model = new roleviewmodel
-                {
-                    name = role.Name,
-                    id = role.Id
-                };
-                return View(); 
+                if (role is null) rolesList = new List<roleviewmodel>();
+                else
+                    rolesList = new List<roleviewmodel>
+            {
+                new roleviewmodel { id = role.Id, name = role.Name }
+            };
             }
+
+            return View(rolesList);
+        }
+
         public async Task<IActionResult> details(string id, string viewname = nameof(details))
         {
             if (string.IsNullOrEmpty(id)) return BadRequest();
